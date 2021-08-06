@@ -162,9 +162,9 @@ interface PresentationComponent {
 }
 ```
 
-### Now app looks like this
+### Now app looks like
 
-![app)[image1.png]
+![plot](./image1.png)
 
 ### Dagger Conventions
 
