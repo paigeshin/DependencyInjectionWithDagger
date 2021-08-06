@@ -4,14 +4,14 @@
 
 [https://github.com/paigeshin/PureDependencyInjection](https://github.com/paigeshin/PureDependencyInjection)
 
-# v.0.0.1
-
-### Whole Process for Dagger
+# Whole Process for Dagger
 
 1. Create Modules
 2. Create Components
 
    ⇒ Client should never access to `Modules` but through `Components`
+
+# v.0.0.1
 
 ### Gradle Configuration
 
@@ -164,7 +164,7 @@ interface PresentationComponent {
 
 ### Now app looks like this
 
-![./image1.png)
+![App Struture)[./image1.png]
 
 ### Dagger Conventions
 
