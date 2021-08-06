@@ -1,12 +1,12 @@
 package com.techyourchance.dagger2course.common.dependnecyinjection
 
+import com.techyourchance.dagger2course.common.dependnecyinjection.presentation.PresentationComponent
 import com.techyourchance.dagger2course.questions.FetchQuestionDetailsUseCase
 import com.techyourchance.dagger2course.questions.FetchQuestionsUseCase
 import com.techyourchance.dagger2course.screens.common.ScreensNavigator
 import com.techyourchance.dagger2course.screens.common.dialogs.DialogsNavigator
 import com.techyourchance.dagger2course.screens.common.viewsmvc.ViewMvcFactory
 import java.lang.reflect.Field
-import java.util.*
 
 class Injector(private val component: PresentationComponent) {
 
@@ -46,7 +46,7 @@ class Injector(private val component: PresentationComponent) {
                 return component.dialogsNavigator()
             }
             ScreensNavigator::class.java -> {
-                return component.screenNavigator()
+                return component.screensNavigator()
             }
             FetchQuestionsUseCase::class.java -> {
                 return component.fetchQuestionsUseCase()
