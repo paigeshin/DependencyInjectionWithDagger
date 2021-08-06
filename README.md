@@ -172,3 +172,18 @@ interface PresentationComponent {
 - Modules are classes annotated with @Module
 - Methods in modules that provide services are annotated with @Provides
 - Provided services can be used as method in other provider methods
+
+### What I learned from verion 0.0.1
+
+- Dagger are composed of two components
+  - Module (@Module, @Provider) => To define what services to be exposed
+  - Component (@Compoment(modules = [ModuleContinaer::class])) => To use services
+- Instantiation of Dagger
+  ```kotlin
+    val appComponent: AppComponent by lazy {
+      DaggerAppComponent.builder()
+        .appModule(AppModule(this))
+        .build()
+    }
+  ```
+-
