@@ -164,7 +164,7 @@ interface PresentationComponent {
 
 ### Now app looks like this
 
-![App Struture)[./image1.png]
+![app)[image1.png]
 
 ### Dagger Conventions
 
