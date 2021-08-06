@@ -27,14 +27,20 @@ class ActivityModule(val activity: AppCompatActivity, private val appComponent: 
     }
     @Provides
     fun activity() = activity
+
     @Provides
     fun application() = appComponent.application()
+
     @Provides
-    fun screensNavigator(activity: AppCompatActivity) = screensNavigator
+    @ActivityScope
+    fun screensNavigator(activity: AppCompatActivity) = ScreensNavigator(activity)
+
     @Provides
     fun layoutInflater() = LayoutInflater.from(activity)
+
     @Provides
     fun fragmentManager() = activity.supportFragmentManager
+
     @Provides
     fun stackoverflowApi() = appComponent.stackoverflowApi()
 }

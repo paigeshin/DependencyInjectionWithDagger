@@ -186,4 +186,177 @@ interface PresentationComponent {
         .build()
     }
   ```
--
+
+# V.0.0.2
+
+### Scope in Dagger2
+
+- This service should be instantiated lazily the first time it's required
+
+```kotlin
+class ActivityModule(val activity: AppCompatActivity, private val appComponent: AppComponent) {
+    private val screensNavigator by lazy {
+        ScreensNavigator(activity)
+    }
+		@Provides
+    fun screensNavigator(activity: AppCompatActivity) = ScreensNavigator(activity)
+}
+
+```
+
+```kotlin
+@Scope
+annotation class ActivityScope {
+
+}
+class ActivityModule(val activity: AppCompatActivity, private val appComponent: AppComponent) {
+		@Provides
+		@ActivityScope
+    fun screensNavigator(activity: AppCompatActivity) = ScreensNavigator(activity)
+}
+
+@ActivityScope
+@Component(modules = [ActivityModule::class])
+interface ActivityComponent {
+    fun activity(): AppCompatActivity
+    fun layoutInflater(): LayoutInflater
+    fun fragmentManager(): FragmentManager
+    fun stackoverflowApi(): StackoverflowApi
+    fun screensNavigator(): ScreensNavigator
+}
+```
+
+⇒ ActivityScope is essentially `Singleton` , but singleton here doesn't mean `Singleton across the whole application`
+
+⇒ All clients get the same instance of a scoped service **from the same instance** of a Component
+
+### Singleton Scope (DefaultScope)
+
+- singleton here doesn't mean `Singleton across the whole application`
+
+- **Before refactoring**
+
+```kotlin
+@Module
+class AppModule(val application: Application) {
+
+    private val retrofit: Retrofit by lazy {
+        Retrofit.Builder()
+                .baseUrl(Constants.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+    }
+
+    private val stackoverflowApi: StackoverflowApi by lazy {
+        retrofit.create(StackoverflowApi::class.java)
+    }
+
+    @Provides
+    fun application() = application
+
+    @Provides
+    fun stackoverflowApi() = stackoverflowApi
+
+}
+```
+
+- **After refactoring**
+
+```kotlin
+@Module
+class AppModule(val application: Application) {
+
+    @Provides
+    @Singleton
+    fun retrofit(): Retrofit {
+        return Retrofit.Builder()
+                .baseUrl(Constants.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+    }
+
+    @Provides
+    fun application() = application
+
+    // This is not recommended way
+    // When working with Dagger2 and you need some dependency, provide it as arguments
+    // calling retrofit() can create new instance.. but here we marked retrofit as singleton so it will work even if we put it this way
+    // However, recommended way when working with Dagger2, provided needed dependency with `arguments`
+    /*
+        @Singleton
+        @Provides
+        fun stackoverflowApi() = retrofit().create(StackoverflowApi::class.java)
+     */
+
+    //Correct Way
+    @Singleton
+    @Provides
+    fun stackoverflowApi(retrofit: Retrofit) = retrofit.create(StackoverflowApi::class.java)
+
+}
+```
+
+### How to pass desired object in dagger2
+
+- **Wrong Code example**
+
+```kotlin
+@Module
+class AppModule(val application: Application) {
+
+    @Provides
+    @Singleton
+    fun retrofit(): Retrofit {
+        return Retrofit.Builder()
+                .baseUrl(Constants.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+    }
+
+    @Provides
+    fun application() = application
+
+    @Singleton
+    @Provides
+    fun stackoverflowApi() = retrofit().create(StackoverflowApi::class.java)
+}
+```
+
+⇒ This is not recommended way
+
+⇒ When working with Dagger2 and need some dependency, provide it as arguments.
+
+⇒ Calling directly retrofit() can create new instance.. but here we marked retrofit as singleton so it will work even if we put it this way
+
+⇒ However, recommended way when working with Dagger2, provided needed dependency with function `arguments`
+
+- **Right way to write dagger code**
+
+```kotlin
+@Module
+class AppModule(val application: Application) {
+
+    @Provides
+    @Singleton
+    fun retrofit(): Retrofit {
+        return Retrofit.Builder()
+                .baseUrl(Constants.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+    }
+
+    @Provides
+    fun application() = application
+
+     //Correct Way
+    @Singleton
+    @Provides
+    fun stackoverflowApi(retrofit: Retrofit) = retrofit.create(StackoverflowApi::class.java)
+}
+```
+
+### Dagger Conventions (2):
+
+- Scopes are annotations, annotated with @Scope
+- Components that provide scoped services must be scoped
+- All clients get the same instance of a scoped service **from the same instance** of a Component
