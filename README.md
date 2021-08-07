@@ -654,3 +654,29 @@ interface PresentationComponent {
 ### After refactoring
 
 ![plot](./image3.png)
+
+### Dagger Conventions (3):
+
+- Void methods with single argument defined on components generate injectors for the type of the argument
+
+```kotlin
+@Component(modules = [PresentationModule::class])
+interface PresentationComponent {
+    fun inject(fragment: QuestionsListFragment)
+    fun inject(activity: QuestionDetailsActivity)
+}
+```
+
+- Client's non-private non-final properties (fields) annotated with @Inject designate injection targets
+
+```kotlin
+@Inject lateinit var fetchQuestionsUseCase: FetchQuestionsUseCase
+@Inject lateinit var dialogsNavigator: DialogsNavigator
+@Inject lateinit var screensNavigator: ScreensNavigator
+@Inject lateinit var viewMvcFactory: ViewMvcFactory
+
+override fun onCreate(savedInstanceState: Bundle?) {
+    injector.inject(this)
+    super.onCreate(savedInstanceState)
+}
+```
