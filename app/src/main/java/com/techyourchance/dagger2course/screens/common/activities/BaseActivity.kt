@@ -20,6 +20,7 @@ open class BaseActivity : AppCompatActivity() {
 
     private val presentationComponent: PresentationComponent by lazy {
         activityComponent.newPresentationComponent(PresentationModule())
+// PresentationComponent delegates its dependency exposure to its parent component
 //        DaggerPresentationComponent.builder()
 //                .activityComponent(activityComponent)
 //                .presentationModule(PresentationModule())
