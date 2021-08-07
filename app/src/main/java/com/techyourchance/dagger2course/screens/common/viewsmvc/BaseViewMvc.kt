@@ -6,8 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
+import javax.inject.Inject
 
-open class BaseViewMvc<LISTENER_TYPE>(
+open class BaseViewMvc<LISTENER_TYPE> @Inject constructor(
         private val layoutInflater: LayoutInflater,
         private val parent: ViewGroup?,
         @LayoutRes private val layoutId: Int
