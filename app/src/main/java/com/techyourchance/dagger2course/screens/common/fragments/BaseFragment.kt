@@ -9,10 +9,6 @@ open class BaseFragment : Fragment() {
 
     private val presentationComponent: PresentationComponent by lazy {
         (requireActivity() as BaseActivity).activityComponent.newPresentationComponent(PresentationModule())
-//        DaggerPresentationComponent.builder()
-//                .activityComponent((requireActivity() as BaseActivity).activityComponent) // inject activityComponent when constructing `Presentationcomponent`
-//                .presentationModule(PresentationModule())
-//                .build()
     }
 
     protected val injector get() = presentationComponent

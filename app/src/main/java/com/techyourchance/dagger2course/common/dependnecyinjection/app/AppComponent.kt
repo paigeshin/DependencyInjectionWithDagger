@@ -1,12 +1,11 @@
 package com.techyourchance.dagger2course.common.dependnecyinjection.app
 
-import android.app.Application
-import com.techyourchance.dagger2course.networking.StackoverflowApi
+import com.techyourchance.dagger2course.common.dependnecyinjection.activity.ActivityComponent
+import com.techyourchance.dagger2course.common.dependnecyinjection.activity.ActivityModule
 import dagger.Component
 
 @AppScope
 @Component(modules = [AppModule::class])
 interface AppComponent {
-    fun application(): Application
-    fun stackoverflowApi(): StackoverflowApi
+    fun newActivityComponent(activityModule: ActivityModule): ActivityComponent
 }

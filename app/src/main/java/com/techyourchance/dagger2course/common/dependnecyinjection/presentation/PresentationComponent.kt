@@ -11,7 +11,6 @@ interface PresentationComponent {
     fun inject(activity: QuestionDetailsActivity)
 }
 
-
 //@PresentationScope
 //@Component(dependencies = [ActivityComponent::class], modules = [PresentationModule::class])
 //interface PresentationComponent {
