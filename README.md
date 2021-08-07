@@ -952,3 +952,114 @@ interface ActivityComponent {
 - Components can use more than one module
 - Modules of a single Component share the same object graph
 - Dagger automatically instantiates modules when no-argument constructors
+
+# v.0.0.7 - Automatic Discover of Services
+
+⇒ Not recommended, but just be aware that this exists.
+
+⇒ Explicitly define modules.
+
+### Dialogs Navigator
+
+```kotlin
+class DialogsNavigator @Inject constructor(private val fragmentManager: FragmentManager) {
+
+    fun showServerErrorDialog() {
+        fragmentManager.beginTransaction()
+                .add(ServerErrorDialogFragment.newInstance(), null)
+                .commitAllowingStateLoss()
+    }
+}
+```
+
+### PresentationModule
+
+```kotlin
+
+@Module
+class PresentationModule() {
+    @Provides
+    fun viewMvcFactory(layoutInflater: LayoutInflater) = ViewMvcFactory(layoutInflater)
+//    @Provides
+//    fun dialogsNavigator(fragmentManager: FragmentManager) = DialogsNavigator(fragmentManager)
+}
+```
+
+### How is this possible?
+
+1. PresentationComponent is subcomponent of ActivityComponent
+2. Inside of ActivityModule, we can find `fun fragmentManager()`
+3. So it will find where `fragmentManger` is needed
+
+```kotlin
+
+@Module//argument `activity` is called bootstrapping dependency, which you can only get when running application
+class ActivityModule(val activity: AppCompatActivity) {
+
+    @Provides
+    fun activity() = activity
+
+    @Provides
+    @ActivityScope
+    fun screensNavigator(activity: AppCompatActivity) = ScreensNavigator(activity)
+
+    @Provides
+    fun layoutInflater() = LayoutInflater.from(activity)
+
+    @Provides
+    fun fragmentManager() = activity.supportFragmentManager
+
+}
+
+```
+
+```kotlin
+package com.techyourchance.dagger2course.screens.common.dialogs
+
+import androidx.fragment.app.FragmentManager
+import javax.inject.Inject
+
+class DialogsNavigator @Inject constructor(private val fragmentManager: FragmentManager) {
+
+    fun showServerErrorDialog() {
+        fragmentManager.beginTransaction()
+                .add(ServerErrorDialogFragment.newInstance(), null)
+                .commitAllowingStateLoss()
+    }
+}
+```
+
+### Scoped Component automatic injection
+
+```kotlin
+@Module    //argument `activity` is called bootstrapping dependency, which you can only get when running application
+class ActivityModule(val activity: AppCompatActivity) {
+
+    @Provides
+    fun activity() = activity
+
+//    @Provides
+//    @ActivityScope
+//    fun screensNavigator(activity: AppCompatActivity) = ScreensNavigator(activity)
+
+    @Provides
+    fun layoutInflater() = LayoutInflater.from(activity)
+
+    @Provides
+    fun fragmentManager() = activity.supportFragmentManager
+
+}@ActivityScope
+class DialogsNavigator @Inject constructor(private val fragmentManager: FragmentManager) {
+
+    fun showServerErrorDialog() {
+        fragmentManager.beginTransaction()
+                .add(ServerErrorDialogFragment.newInstance(), null)
+                .commitAllowingStateLoss()
+    }
+}
+```
+
+### Dagger Conventions(7)
+
+- Dagger can automatically discover services having a public constructor annotated with @Inject annotation
+- Automatically discovered services can be scoped
