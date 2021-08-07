@@ -780,3 +780,68 @@ DaggerPresentationComponent.builder()
 - Component B that depends on Component A has implicit access to all services exposed by Component A
   - Services from A can be injected by B
   - Services from A can be consumed inside modules of B
+
+# v.0.0.5 - Subcomponent
+
+### Refactoring Presentation Component
+
+```kotlin
+@PresentationScope
+@Subcomponent(modules = [PresentationModule::class])
+interface PresentationComponent {
+    fun inject(fragment: QuestionsListFragment)
+    fun inject(activity: QuestionDetailsActivity)
+}
+
+//@PresentationScope
+//@Component(dependencies = [ActivityComponent::class], modules = [PresentationModule::class])
+//interface PresentationComponent {
+//    fun inject(fragment: QuestionsListFragment)
+//    fun inject(activity: QuestionDetailsActivity)
+//}
+```
+
+⇒ Make it subcomponent
+
+⇒ This simply means component here delegates its dependency injection to parent component
+
+### Refactoring Activity Component
+
+```kotlin
+@ActivityScope
+@Component(dependencies = [AppComponent::class], modules = [ActivityModule::class])
+interface ActivityComponent {
+    fun newPresentationComponent(presentationModule: PresentationModule): PresentationComponent
+}
+
+//@ActivityScope
+//@Component(dependencies = [AppComponent::class], modules = [ActivityModule::class])
+//interface ActivityComponent {
+//    fun activity(): AppCompatActivity
+//    fun layoutInflater(): LayoutInflater
+//    fun stackoverflowApi(): StackoverflowApi
+//    fun fragmentManager(): FragmentManager
+//    fun screensNavigator(): ScreensNavigator
+//}
+```
+
+⇒ ActivityComponent will expose `PresentationComponent`
+
+### Initialization
+
+```kotlin
+private val presentationComponent: PresentationComponent by lazy {
+        activityComponent.newPresentationComponent(PresentationModule())
+//        DaggerPresentationComponent.builder()
+//                .activityComponent(activityComponent)
+//                .presentationModule(PresentationModule())
+//                .build()
+  }
+```
+
+### Dagger Conventions (5):
+
+- Subcomponents specified by @Subcomponent annotation
+- Parent Component exposes factory method which returns Subcomponent
+- The argument of the factory method are Subcomponent's modules
+- Subcomponents get access to all services provided by parent (provided, not just exposed)
