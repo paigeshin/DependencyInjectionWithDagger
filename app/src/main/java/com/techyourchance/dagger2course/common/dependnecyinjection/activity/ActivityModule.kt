@@ -8,7 +8,7 @@ import com.techyourchance.dagger2course.screens.common.ScreensNavigator
 import dagger.Module
 import dagger.Provides
 
-@Module
+@Module    //argument `activity` is called bootstrapping dependency, which you can only get when running application
 class ActivityModule(val activity: AppCompatActivity) {
 
     @Provides

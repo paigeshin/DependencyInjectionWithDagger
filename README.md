@@ -845,3 +845,110 @@ private val presentationComponent: PresentationComponent by lazy {
 - Parent Component exposes factory method which returns Subcomponent
 - The argument of the factory method are Subcomponent's modules
 - Subcomponents get access to all services provided by parent (provided, not just exposed)
+
+# v.0.0.6 - Multi-module components
+
+### Base Example
+
+```kotlin
+@PresentationScope
+@Subcomponent(modules = [PresentationModule::class, UsecasesModule::class])
+interface PresentationComponent {
+    fun inject(fragment: QuestionsListFragment)
+    fun inject(activity: QuestionDetailsActivity)
+}
+
+@Module
+class PresentationModule() {
+    @Provides
+    fun viewMvcFactory(layoutInflater: LayoutInflater) = ViewMvcFactory(layoutInflater)
+    @Provides
+    fun dialogsNavigator(fragmentManager: FragmentManager) = DialogsNavigator(fragmentManager)
+}
+
+@Module
+class UsecasesModule {
+    @Provides
+    fun fetchQuestionsUseCase(stackoverflowApi: StackoverflowApi) = FetchQuestionsUseCase(stackoverflowApi)
+    @Provides
+    fun fetchQuestionDetailsUseCase(stackoverflowApi: StackoverflowApi) = FetchQuestionDetailsUseCase(stackoverflowApi)
+}
+```
+
+### Bootstrapping Dependency
+
+```kotlin
+@Module    //argument `activity` is called bootstrapping dependency, which you can only get when running application
+class ActivityModule(val activity: AppCompatActivity) {
+
+    @Provides
+    fun activity() = activity
+
+    @Provides
+    @ActivityScope
+    fun screensNavigator(activity: AppCompatActivity) = ScreensNavigator(activity)
+
+    @Provides
+    fun layoutInflater() = LayoutInflater.from(activity)
+
+    @Provides
+    fun fragmentManager() = activity.supportFragmentManager
+
+}
+```
+
+⇒ argument `activity` is called bootstrapping dependency, which you can only get from exterior module
+
+### Refactoring ActivityComponent
+
+- ActivityComponent before refactoring
+
+```kotlin
+@ActivityScope
+@Subcomponent(modules = [ActivityModule::class])
+interface ActivityComponent {
+    //You don't need to pass `presentationModule` when it doesn't have any bootstrapping dependency
+    fun newPresentationComponent(presentationModule: PresentationModule): PresentationComponent
+}
+```
+
+- ActivityComponent after refactoring
+
+```kotlin
+@ActivityScope
+@Subcomponent(modules = [ActivityModule::class])
+interface ActivityComponent {
+    //You don't need to pass `presentationModule` when it doesn't have any bootstrapping dependency
+    fun newPresentationComponent(): PresentationComponent
+}
+```
+
+⇒ This is possible because dagger has this convention and it knows how to instantiate objects without constructors
+
+⇒ Provide no argument when there isn't a bootstrapping argument
+
+### Best way to define subcomponent
+
+```kotlin
+package com.techyourchance.dagger2course.common.dependnecyinjection.activity
+
+import com.techyourchance.dagger2course.common.dependnecyinjection.presentation.PresentationComponent
+import com.techyourchance.dagger2course.common.dependnecyinjection.presentation.PresentationModule
+import com.techyourchance.dagger2course.common.dependnecyinjection.presentation.UsecasesModule
+import dagger.Subcomponent
+
+@ActivityScope
+@Subcomponent(modules = [ActivityModule::class])
+interface ActivityComponent {
+    //You don't need to pass `presentationModule` when it doesn't have any bootstrapping dependency
+    fun newPresentationComponent(presentationModule: PresentationModule, usecasesModule: UsecasesModule): PresentationComponent
+}
+```
+
+⇒ Even if `PresentationModule` and `UsecaseModule` doesn't have any bootstrapping dependency, it's best to provide arguments for convention and code maintenance
+
+### Dagger Conventions (6)
+
+- Components can use more than one module
+- Modules of a single Component share the same object graph
+- Dagger automatically instantiates modules when no-argument constructors
