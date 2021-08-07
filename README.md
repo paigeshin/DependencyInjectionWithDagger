@@ -680,3 +680,103 @@ override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 }
 ```
+
+# v.0.0.4 - Dependent Components
+
+### Refactoring PresentationModule.kt
+
+- Before refactoring
+
+```kotlin
+@Module
+class PresentationModule(private val activityComponent: ActivityComponent) {
+    @Provides
+    fun layoutInflater() = activityComponent.layoutInflater()
+    @Provides
+    fun fragmentManager() = activityComponent.fragmentManager()
+    @Provides
+    fun stackoverflowApi() = activityComponent.stackoverflowApi()
+    @Provides
+    fun activity() = activityComponent.activity()
+    //실제 사용.
+    @Provides
+    fun screensNavigator() = activityComponent.screensNavigator()
+    @Provides
+    fun viewMvcFactory(layoutInflater: LayoutInflater) = ViewMvcFactory(layoutInflater)
+    @Provides
+    fun dialogsNavigator(fragmentManager: FragmentManager) = DialogsNavigator(fragmentManager)
+    @Provides
+    fun fetchQuestionsUseCase(stackoverflowApi: StackoverflowApi) = FetchQuestionsUseCase(stackoverflowApi)
+    @Provides
+    fun fetchQuestionDetailsUseCase(stackoverflowApi: StackoverflowApi) = FetchQuestionDetailsUseCase(stackoverflowApi)
+}
+```
+
+- After refactoring
+
+```kotlin
+@Module
+class PresentationModule() {
+    @Provides
+    fun viewMvcFactory(layoutInflater: LayoutInflater) = ViewMvcFactory(layoutInflater)
+    @Provides
+    fun dialogsNavigator(fragmentManager: FragmentManager) = DialogsNavigator(fragmentManager)
+    @Provides
+    fun fetchQuestionsUseCase(stackoverflowApi: StackoverflowApi) = FetchQuestionsUseCase(stackoverflowApi)
+    @Provides
+    fun fetchQuestionDetailsUseCase(stackoverflowApi: StackoverflowApi) = FetchQuestionDetailsUseCase(stackoverflowApi)
+}
+```
+
+⇒ All dependencies come from `ActivityComponent`
+
+### Refactoring PresentationComponent.kt
+
+- Before refactoring
+
+```kotlin
+@Component(modules = [PresentationModule::class])
+interface PresentationComponent {
+    fun inject(fragment: QuestionsListFragment)
+    fun inject(activity: QuestionDetailsActivity)
+}
+```
+
+- After refactoring
+
+```kotlin
+@PresentationScope
+@Component(dependencies = [ActivityComponent::class], modules = [PresentationModule::class])
+interface PresentationComponent {
+    fun inject(fragment: QuestionsListFragment)
+    fun inject(activity: QuestionDetailsActivity)
+}
+```
+
+⇒ Component has an explicit dependency declaration of `ActivityComponent::class`
+
+### Inject dependencies
+
+- Before refactoring
+
+```kotlin
+DaggerPresentationComponent.builder()
+                .presentationModule(PresentationModule(activityComponent))
+                .build()
+```
+
+- After refactoring
+
+```kotlin
+DaggerPresentationComponent.builder()
+        .activityComponent(activityComponent)
+        .presentationModule(PresentationModule())
+        .build()
+```
+
+### Dagger Convention (4):
+
+- Component inter-dependencies are specified as part of @Component annotation
+- Component B that depends on Component A has implicit access to all services exposed by Component A
+  - Services from A can be injected by B
+  - Services from A can be consumed inside modules of B
