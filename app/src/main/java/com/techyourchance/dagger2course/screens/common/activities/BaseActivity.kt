@@ -9,7 +9,7 @@ import com.techyourchance.dagger2course.common.dependnecyinjection.presentation.
 import com.techyourchance.dagger2course.common.dependnecyinjection.presentation.PresentationComponent
 import com.techyourchance.dagger2course.common.dependnecyinjection.presentation.PresentationModule
 
-open class BaseActivity: AppCompatActivity() {
+open class BaseActivity : AppCompatActivity() {
 
     private val appComponent get() = (application as MyApplication).appComponent
 
@@ -20,12 +20,16 @@ open class BaseActivity: AppCompatActivity() {
     }
 
     private val presentationComponent: PresentationComponent by lazy {
+//        DaggerPresentationComponent.builder()
+//                .presentationModule(PresentationModule(activityComponent))
+//                .build()
         DaggerPresentationComponent.builder()
-                .presentationModule(PresentationModule(activityComponent))
+                .activityComponent(activityComponent)
+                .presentationModule(PresentationModule())
                 .build()
     }
 
-//    protected val injector get() = Injector(presentationComponent)
+    //    protected val injector get() = Injector(presentationComponent)
     protected val injector get() = presentationComponent
 
 }
