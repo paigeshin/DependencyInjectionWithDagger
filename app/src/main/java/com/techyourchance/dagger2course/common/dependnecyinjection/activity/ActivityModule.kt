@@ -8,28 +8,11 @@ import com.techyourchance.dagger2course.screens.common.ScreensNavigator
 import dagger.Module
 import dagger.Provides
 
-
-//class ActivityCompositionRoot(val activity: AppCompatActivity,
-//                              private val appCompositionRoot: AppCompositionRoot) {
-//    val screensNavigator by lazy {
-//        ScreensNavigator(activity)
-//    }
-//    val application get() = appCompositionRoot.application
-//    val layoutInflater: LayoutInflater get() = LayoutInflater.from(activity)
-//    val fragmentManager get() = activity.supportFragmentManager
-//    val stackoverflowApi get() = appCompositionRoot.stackoverflowApi
-//}
-
 @Module
-class ActivityModule(val activity: AppCompatActivity, private val appComponent: AppComponent) {
-    private val screensNavigator by lazy {
-        ScreensNavigator(activity)
-    }
+class ActivityModule(val activity: AppCompatActivity) {
+
     @Provides
     fun activity() = activity
-
-    @Provides
-    fun application() = appComponent.application()
 
     @Provides
     @ActivityScope
@@ -41,6 +24,4 @@ class ActivityModule(val activity: AppCompatActivity, private val appComponent: 
     @Provides
     fun fragmentManager() = activity.supportFragmentManager
 
-    @Provides
-    fun stackoverflowApi() = appComponent.stackoverflowApi()
 }
