@@ -8,12 +8,20 @@
 
 Recommended Structure ⇒ [https://github.com/paigeshin/DependencyInjectionWithDagger/tree/1da15c90fefbeb1cfaf85c3e4aaa57c7f7c69c30](https://github.com/paigeshin/DependencyInjectionWithDagger/tree/1da15c90fefbeb1cfaf85c3e4aaa57c7f7c69c30)
 
-# Whole Process for Dagger
+### Whole Process for Dagger
 
 1. Create Modules
+
+   - Modules
+   - Scopes
+   - Components
+
 2. Create Components
 
    ⇒ Client should never access to `Modules` but through `Components`
+
+   - Subcomponent
+   - Multiple Modules
 
 # v.0.0.1
 
@@ -1067,3 +1075,11 @@ class DialogsNavigator @Inject constructor(private val fragmentManager: Fragment
 
 - Dagger can automatically discover services having a public constructor annotated with @Inject annotation
 - Automatically discovered services can be scoped
+
+# Summary
+
+![plot](./image4.png)
+
+- Modules
+- Scopes
+- Components
